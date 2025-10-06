@@ -1,0 +1,1077 @@
+give me css that alighn with the other modals like signup in terms of colors:  also include a button which when clicked opens up all memes uploaded by the current user. The user can delete and edit memes they posted only. the profile when viewed should not have these previlages if thy donot belog to the user who is logged in. <?php
+
+// index.php
+
+
+
+require   './db/config.php'; // Ensure this path is correct for your database connection
+
+session_start();
+
+?>
+
+
+
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>ZedMemes</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/foundation/6.7.5/css/foundation.min.css">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <link rel="stylesheet" href="./assets/css/style.css">
+
+</head>
+
+<body>
+
+   <!-- Replace the header section in your index.php with this updated version -->
+
+
+
+<header class="header">
+
+    <div class="grid-container">
+
+        <div class="grid-x align-middle">
+
+            <div class="cell auto">
+
+                <h1>
+
+                    <img src="logo.jpg" alt="ZedMemes Logo" class="logo">
+
+                    ZedMemes
+
+                </h1>
+
+            </div>
+
+            <div class="cell shrink">
+
+                <div class="button-group" id="auth-buttons">
+
+
+
+                    
+
+                    <?php if (isset($_SESSION['user'])): ?>
+
+                        <button id="profile-btn">
+
+                            <span class="welcome-text">
+
+                                Welcome, <?php echo htmlspecialchars($_SESSION['user']['username']); ?>!
+
+                            </span>
+
+                        </button>  
+
+                        <button class="btn" id="upload-btn">
+
+                            <i class="fas fa-upload"></i> Upload
+
+                        </button>
+
+                        <button class="btn btn-logout" id="logout-btn">
+
+                            <i class="fas fa-sign-out-alt"></i> Logout
+
+                        </button>
+
+                    <?php else: ?>
+
+                        <button class="btn" id="signin-btn">
+
+                            <i class="fas fa-sign-in-alt"></i> Sign In
+
+                        </button>
+
+                        <button class="btn btn-primary1" id="signup-btn">
+
+                            <i class="fas fa-user-plus"></i> Sign Up
+
+                        </button>
+
+                    <?php endif; ?>
+
+                    <!-- Theme toggle button -->
+
+                    <button class="theme-toggle" id="theme-toggle" title="Toggle dark/light mode">
+
+                        <i class="fas fa-moon"></i>
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</header>
+
+
+
+    <main class="grid-container">
+
+        <div class="search-controls">
+
+            <div class="search-bar">
+
+                <input type="text" id="search-input" class="search-input" placeholder="Search memes by caption or username...">
+
+                <button class="search-btn" id="search-btn">
+
+                    <i class="fas fa-search"></i>
+
+                </button>
+
+            </div>
+
+
+
+            <div class="filter-tabs">
+
+                <div class="filter-tab active" data-filter="latest">
+
+                    <i class="fas fa-clock"></i> Latest
+
+                </div>
+
+                <div class="filter-tab" data-filter="most-voted">
+
+                    <i class="fas fa-trophy"></i> Most Voted
+
+                </div>
+
+                <div class="filter-tab" data-filter="for-you">
+
+                    <i class="fas fa-heart"></i> For You
+
+                </div>
+
+            </div>
+
+
+
+            <div class="category-tabs">
+
+                <div class="category-tab active" data-category="all">All</div>
+
+                <div class="category-tab" data-category="school">School</div>
+
+                <div class="category-tab" data-category="jokes">Jokes</div>
+
+                <div class="category-tab" data-category="relationships">Relationships</div>
+
+                <div class="category-tab" data-category="work">Work</div>
+
+                <div class="category-tab" data-category="trending">Trending</div>
+
+                <div class="category-tab" data-category="sports">Sports</div>
+
+            </div>
+
+        </div>
+
+
+
+        <div id="meme-container" class="grid-x grid-margin-x small-up-1 medium-up-2 large-up-3 xlarge-up-4">
+
+
+
+        </div>
+
+
+
+        </main>
+
+
+
+    <!-- Login Modal -->
+
+    <div id="login-modal" class="reveal" data-reveal>
+
+            <div class="modal-header">
+
+                <button class="modal-close" data-close aria-label="Close modal" type="button">&times;</button>
+
+                <h2 class="modal-title">Welcome Back</h2>
+
+                <p class="modal-subtitle">Sign in to your ZedMemes account</p>
+
+            </div>
+
+            <div class="modal-body">
+
+                <form id="login-form">
+
+                    <div class="form-group">
+
+                        <label class="form-label" for="login-email">Email Address</label>
+
+                        <div class="input-container">
+
+                            <input type="email" id="login-email" class="form-input" placeholder="Enter your email" required>
+
+                            <i class="fas fa-envelope input-icon"></i>
+
+                        </div>
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label class="form-label" for="login-password">Password</label>
+
+                        <div class="input-container">
+
+                            <input type="password" id="login-password" class="form-input" placeholder="Enter your password" required>
+
+                            <i class="fas fa-eye password-toggle input-icon" onclick="togglePassword('login-password', this)"></i>
+
+                        </div>
+
+                    </div>
+
+                    <button type="submit" class="btn-primary">Sign In</button>
+
+                    <div class="status-message" id="login-status"></div>
+
+                </form>
+
+                <div class="toggle-link">
+
+                    <a href="#" onclick="switchModal('login', 'signup')">Don't have an account? Sign up</a>
+
+                </div>
+
+            </div>
+
+    </div>
+
+
+
+    <!-- Signup Modal -->
+
+    <div id="signup-modal" class="reveal" data-reveal>
+
+            <div class="modal-header">
+
+                <button class="modal-close" data-close aria-label="Close modal" type="button">&times;</button>
+
+                <h2 class="modal-title">Join ZedMemes</h2>
+
+                <p class="modal-subtitle">Create your account to start sharing memes</p>
+
+            </div>
+
+            <div class="modal-body">
+
+                <form id="signup-form">
+
+                    <div class="form-group">
+
+                        <label class="form-label" for="signup-username">Username</label>
+
+                        <div class="input-container">
+
+                            <input type="text" id="signup-username" class="form-input" placeholder="Choose a username" required>
+
+                            <i class="fas fa-user input-icon"></i>
+
+                        </div>
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label class="form-label" for="signup-email">Email Address</label>
+
+                        <div class="input-container">
+
+                            <input type="email" id="signup-email" class="form-input" placeholder="Enter your email" required>
+
+                            <i class="fas fa-envelope input-icon"></i>
+
+                        </div>
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label class="form-label" for="signup-password">Password</label>
+
+                        <div class="input-container">
+
+                            <input type="password" id="signup-password" class="form-input" placeholder="Create a password" required>
+
+                            <i class="fas fa-eye password-toggle input-icon" onclick="togglePassword('signup-password', this)"></i>
+
+                        </div>
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label class="form-label" for="signup-confirm">Confirm Password</label>
+
+                        <div class="input-container">
+
+                            <input type="password" id="signup-confirm" class="form-input" placeholder="Confirm your password" required>
+
+                            <i class="fas fa-eye password-toggle input-icon" onclick="togglePassword('signup-confirm', this)"></i>
+
+                        </div>
+
+                    </div>
+
+                    <button type="submit" class="btn-primary">Create Account</button>
+
+                    <div class="status-message" id="signup-status"></div>
+
+                </form>
+
+                <div class="toggle-link">
+
+                  <a href="#" onclick="switchModal('signup', 'login')">Already have an account? Sign in</a>
+
+                </div>
+
+            </div>
+
+    </div>
+
+
+
+    <!-- Upload Modal -->
+
+    <div id="upload-modal" class="reveal" data-reveal>
+
+        <div class="modal-header">
+
+        <h2>Upload Meme</h2>
+
+        <button class="modal-close" data-close aria-label="Close modal" type="button">&times;</button>
+
+        </div>
+
+        <div class="modal-body">
+
+        <form id="upload-form" enctype="multipart/form-data">
+
+            <div class="form-group">
+
+            <label>Select Image</label>
+
+            <div class="upload-area" id="upload-area">
+
+                <i class="fas fa-cloud-upload-alt" style="font-size: 3rem; color: #ccc; margin-bottom: 1rem;"></i>
+
+                <p>Click to select an image or drag and drop</p>
+
+                <input type="file" id="meme-file" name="meme" accept="image/*" style="display: none;">
+
+            </div>
+
+            <div id="image-preview" style="display: none; text-align: center;">
+
+                <img id="preview-img" class="preview-image" alt="Preview">
+
+            </div>
+
+            </div>
+
+            <div class="form-group">
+
+            <label for="meme-caption">Caption</label>
+
+            <input type="text" id="meme-caption" name="caption" class="form-control" placeholder="Add a funny caption..." required>
+
+            </div>
+
+            <div class="form-group">
+
+            <label for="meme-category">Category</label>
+
+            <select id="meme-category" name="category" class="category-select" required>
+
+                <option value="">Select a category</option>
+
+                <option value="school">School Memes</option>
+
+                <option value="jokes">Jokes</option>
+
+                <option value="relationships">Relationships</option>
+
+                <option value="work">Work Life</option>
+
+                <option value="trending">Trending</option>
+
+                <option value="sports">Sports</option>
+
+            </select>
+
+            </div>
+
+            <button type="submit" class="btn-submit">Upload Meme</button>
+
+            <div class="status-message" id="upload-message" style="display: none;"></div>
+
+        </form>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- Profile Modal -->
+
+    <div id="profile-modal" class="reveal large" data-reveal>
+
+    <button class="close-button" data-close aria-label="Close modal" type="button">
+
+        <span aria-hidden="true">&times;</span>
+
+    </button>
+
+    <div class="grid-container">
+
+        <div class="grid-x grid-margin-x text-center">
+
+        <div class="cell small-12">
+
+            <div class="user-profile-avatar circle bg-primary white-text" style="width: 80px; height: 80px; line-height: 80px; font-size: 2rem; margin: 0 auto;">
+
+            JD
+
+            </div>
+
+            <h4 class="profile-username mt-2">john_doe</h4>
+
+            <p class="profile-email">john@example.com</p>
+
+        </div>
+
+
+
+        <div class="cell small-12 profile-stats grid-x grid-margin-x">
+
+            <div class="cell small-4 text-center stat-item">
+
+            <div class="stat-number h4">127</div>
+
+            <div class="stat-label">Memes Posted</div>
+
+            </div>
+
+            <div class="cell small-4 text-center stat-item">
+
+            <div class="stat-number h4">2.5K</div>
+
+            <div class="stat-label">Total Votes</div>
+
+            </div>
+
+            <div class="cell small-4 text-center stat-item">
+
+            <div class="stat-number h4">1.2K</div>
+
+            <div class="stat-label">Total Likes</div>
+
+            </div>
+
+        </div>
+
+
+
+        <div class="cell small-12 profile-actions mt-3" id="profile-actions">
+
+            <!-- JS will populate buttons -->
+
+        </div>
+
+        </div>
+
+    </div>
+
+    </div>
+
+
+
+    <!-- Edit Profile Modal -->
+
+   <div id="edit-profile-modal" class="reveal" data-reveal>
+
+    <div class="modal-header">
+
+        <button class="modal-close" data-close aria-label="Close modal" type="button">&times;</button>
+
+        <h2 class="modal-title">Edit Profile</h2>
+
+        <p class="modal-subtitle">Update your account information</p>
+
+    </div>
+
+
+
+    <div class="modal-body"> <form id="edit-profile-form">
+
+                <div class="form-group"> <label class="form-label">Username <div class="input-container"> <input type="text" id="edit-username" class="form-input" placeholder="Enter new username" required autocomplete="username"> <i class="fas fa-user input-icon"></i> </div>
+
+                        </label>
+
+                    </div>
+
+
+
+                    <div class="form-group"> <label class="form-label">Email <div class="input-container"> <input type="email" id="edit-email" class="form-input" placeholder="Enter new email" required autocomplete="email"> <i class="fas fa-envelope input-icon"></i> </div>
+
+                        </label>
+
+                    </div>
+
+
+
+                    <div class="form-group"> <label class="form-label">Current Password <div class="input-container"> <input type="password" id="edit-current-password" class="form-input" placeholder="Enter current password" required autocomplete="current-password"> <i class="fas fa-eye password-toggle input-icon" onclick="togglePassword('edit-current-password', this)"></i> </div>
+
+                        </label>
+
+                    </div>
+
+
+
+                    <div class="form-group"> <label class="form-label">New Password (optional) <div class="input-container"> <input type="password" id="edit-new-password" class="form-input" placeholder="Enter new password" autocomplete="new-password"> <i class="fas fa-eye password-toggle input-icon" onclick="togglePassword('edit-new-password', this)"></i> </div>
+
+                        </label>
+
+                    </div>
+
+
+
+                    <div class="form-group"> <label class="form-label">Confirm New Password <div class="input-container"> <input type="password" id="edit-confirm-password" class="form-input" placeholder="Confirm new password" autocomplete="new-password"> <i class="fas fa-eye password-toggle input-icon" onclick="togglePassword('edit-confirm-password', this)"></i> </div>
+
+                        </label>
+
+                    </div>
+
+
+
+                    <button type="submit" class="btn-primary">Update Profile</button> <div id="edit-profile-status" class="status-message"></div> </form>
+
+        </div> </div>
+
+
+
+
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/foundation/6.7.5/js/foundation.min.js"></script>
+
+
+
+    <script>
+
+        window.currentUser = <?php echo isset($_SESSION['user']) ? json_encode($_SESSION['user']) : 'null'; ?>;
+
+         $(document).foundation();
+
+   </script>
+
+    
+
+    <script src="assets/js/script.js"></script>
+
+
+
+
+
+</body>
+
+</html> // --- User Profile Modal Logic ---
+
+const userProfileModal = document.getElementById('profile-modal');
+
+const profileUsername = userProfileModal?.querySelector('.profile-username');
+
+const profileEmail = userProfileModal?.querySelector('.profile-email');
+
+const profileAvatar = userProfileModal?.querySelector('.user-profile-avatar');
+
+const profileStats = userProfileModal?.querySelector('.profile-stats');
+
+const profileActions = document.getElementById('profile-actions');
+
+
+
+// Handle opening profile modal from navbar/profile button
+
+document.getElementById('profile-btn')?.addEventListener('click', () => {
+
+    if (!currentUser || !currentUser.id) {
+
+        openModal('login');
+
+        return;
+
+    }
+
+
+
+    openUserProfileModalDelegation(currentUser.id); // use ID directly
+
+});
+
+
+
+// Delegate click listeners to open other user profiles
+
+function attachUserProfileListeners() {
+
+    memeContainer?.removeEventListener('click', handleAvatarClick);
+
+    memeContainer?.addEventListener('click', handleAvatarClick);
+
+}
+
+
+
+// Extract and pass userId to the modal logic
+
+function handleAvatarClick(event) {
+
+    const avatar = event.target.closest('.user-avatar');
+
+    if (!avatar || !avatar.dataset.user) return;
+
+
+
+    const memeHeader = avatar.closest('.meme-header');
+
+    const userId = memeHeader?.dataset.userId;
+
+
+
+    if (userId) {
+
+        openUserProfileModalDelegation(userId);
+
+    }
+
+}// Main function to open profile modal and populate data
+
+async function openUserProfileModalDelegation(userId) {
+
+    try {
+
+        console.log('Opening profile for user ID:', userId);
+
+        console.log(document.getElementById('profile-modal'));
+
+        
+
+
+
+        const response = await fetch(`get_user_profile.php?user_id=${userId}`);
+
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+
+
+        const data = await response.json();
+
+
+
+        if (data.success) {
+
+            const user = data.user;
+
+
+
+            if (profileAvatar) profileAvatar.textContent = user.username?.charAt(0).toUpperCase() || 'U';
+
+            if (profileUsername) profileUsername.textContent = user.username || 'Unknown';
+
+            if (profileEmail) profileEmail.textContent = user.email || 'N/A';
+
+
+
+            if (profileStats) {
+
+                profileStats.innerHTML = `
+
+                    <div class="cell small-4 text-center stat-item">
+
+                        <div class="stat-number h4">${user.meme_count || 0}</div>
+
+                        <div class="stat-label">Memes Posted</div>
+
+                    </div>
+
+                    <div class="cell small-4 text-center stat-item">
+
+                        <div class="stat-number h4">${user.total_votes || 0}</div>
+
+                        <div class="stat-label">Total Votes</div>
+
+                    </div>
+
+                    <div class="cell small-4 text-center stat-item">
+
+                        <div class="stat-number h4">${user.total_likes || 0}</div>
+
+                        <div class="stat-label">Total Likes</div>
+
+                    </div>
+
+                `;
+
+            }
+
+
+
+            const isCurrentUser = currentUser && parseInt(currentUser.id) === parseInt(userId);
+
+            if (profileActions) {
+
+                profileActions.innerHTML = isCurrentUser
+
+                    ? `
+
+                        <button class="button primary small" id="edit-profile-btn">
+
+                            <i class="fas fa-edit"></i> Edit Profile
+
+                        </button>
+
+                        <button class="button alert small" id="profile-logout-btn">
+
+                            <i class="fas fa-sign-out-alt"></i> Logout
+
+                        </button>
+
+                    `
+
+                    : `
+
+                        <button class="button secondary small" disabled>
+
+                            <i class="fas fa-eye"></i> Viewing Profile
+
+                        </button>
+
+                    `;
+
+            }
+
+
+
+            // Attach listeners after rendering buttons
+
+            document.getElementById('edit-profile-btn')?.addEventListener('click', openEditProfileModal);
+
+            document.getElementById('profile-logout-btn')?.addEventListener('click', handleProfileModalLogout);
+
+
+
+            openModal('profile');
+
+        } else {
+
+            console.error('Error fetching profile:', data.message);
+
+            showMessage('Error loading profile: ' + data.message, 'error');
+
+        }
+
+    } catch (error) {
+
+        console.error('Fetch error for profile modal:', error);
+
+        showMessage('Error loading profile. Please try again.', 'error');
+
+    }
+
+}// Main function to open profile modal and populate data
+
+async function openUserProfileModalDelegation(userId) {
+
+    try {
+
+        console.log('Opening profile for user ID:', userId);
+
+        console.log(document.getElementById('profile-modal'));
+
+        
+
+
+
+        const response = await fetch(`get_user_profile.php?user_id=${userId}`);
+
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+
+
+        const data = await response.json();
+
+
+
+        if (data.success) {
+
+            const user = data.user;
+
+
+
+            if (profileAvatar) profileAvatar.textContent = user.username?.charAt(0).toUpperCase() || 'U';
+
+            if (profileUsername) profileUsername.textContent = user.username || 'Unknown';
+
+            if (profileEmail) profileEmail.textContent = user.email || 'N/A';
+
+
+
+            if (profileStats) {
+
+                profileStats.innerHTML = `
+
+                    <div class="cell small-4 text-center stat-item">
+
+                        <div class="stat-number h4">${user.meme_count || 0}</div>
+
+                        <div class="stat-label">Memes Posted</div>
+
+                    </div>
+
+                    <div class="cell small-4 text-center stat-item">
+
+                        <div class="stat-number h4">${user.total_votes || 0}</div>
+
+                        <div class="stat-label">Total Votes</div>
+
+                    </div>
+
+                    <div class="cell small-4 text-center stat-item">
+
+                        <div class="stat-number h4">${user.total_likes || 0}</div>
+
+                        <div class="stat-label">Total Likes</div>
+
+                    </div>
+
+                `;
+
+            }
+
+
+
+            const isCurrentUser = currentUser && parseInt(currentUser.id) === parseInt(userId);
+
+            if (profileActions) {
+
+                profileActions.innerHTML = isCurrentUser
+
+                    ? `
+
+                        <button class="button primary small" id="edit-profile-btn">
+
+                            <i class="fas fa-edit"></i> Edit Profile
+
+                        </button>
+
+                        <button class="button alert small" id="profile-logout-btn">
+
+                            <i class="fas fa-sign-out-alt"></i> Logout
+
+                        </button>
+
+                    `
+
+                    : `
+
+                        <button class="button secondary small" disabled>
+
+                            <i class="fas fa-eye"></i> Viewing Profile
+
+                        </button>
+
+                    `;
+
+            }
+
+
+
+            // Attach listeners after rendering buttons
+
+            document.getElementById('edit-profile-btn')?.addEventListener('click', openEditProfileModal);
+
+            document.getElementById('profile-logout-btn')?.addEventListener('click', handleProfileModalLogout);
+
+
+
+            openModal('profile');
+
+        } else {
+
+            console.error('Error fetching profile:', data.message);
+
+            showMessage('Error loading profile: ' + data.message, 'error');
+
+        }
+
+    } catch (error) {
+
+        console.error('Fetch error for profile modal:', error);
+
+        showMessage('Error loading profile. Please try again.', 'error');
+
+    }
+
+}// Main function to open profile modal and populate data
+
+async function openUserProfileModalDelegation(userId) {
+
+    try {
+
+        console.log('Opening profile for user ID:', userId);
+
+        console.log(document.getElementById('profile-modal'));
+
+        
+
+
+
+        const response = await fetch(`get_user_profile.php?user_id=${userId}`);
+
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+
+
+        const data = await response.json();
+
+
+
+        if (data.success) {
+
+            const user = data.user;
+
+
+
+            if (profileAvatar) profileAvatar.textContent = user.username?.charAt(0).toUpperCase() || 'U';
+
+            if (profileUsername) profileUsername.textContent = user.username || 'Unknown';
+
+            if (profileEmail) profileEmail.textContent = user.email || 'N/A';
+
+
+
+            if (profileStats) {
+
+                profileStats.innerHTML = `
+
+                    <div class="cell small-4 text-center stat-item">
+
+                        <div class="stat-number h4">${user.meme_count || 0}</div>
+
+                        <div class="stat-label">Memes Posted</div>
+
+                    </div>
+
+                    <div class="cell small-4 text-center stat-item">
+
+                        <div class="stat-number h4">${user.total_votes || 0}</div>
+
+                        <div class="stat-label">Total Votes</div>
+
+                    </div>
+
+                    <div class="cell small-4 text-center stat-item">
+
+                        <div class="stat-number h4">${user.total_likes || 0}</div>
+
+                        <div class="stat-label">Total Likes</div>
+
+                    </div>
+
+                `;
+
+            }
+
+
+
+            const isCurrentUser = currentUser && parseInt(currentUser.id) === parseInt(userId);
+
+            if (profileActions) {
+
+                profileActions.innerHTML = isCurrentUser
+
+                    ? `
+
+                        <button class="button primary small" id="edit-profile-btn">
+
+                            <i class="fas fa-edit"></i> Edit Profile
+
+                        </button>
+
+                        <button class="button alert small" id="profile-logout-btn">
+
+                            <i class="fas fa-sign-out-alt"></i> Logout
+
+                        </button>
+
+                    `
+
+                    : `
+
+                        <button class="button secondary small" disabled>
+
+                            <i class="fas fa-eye"></i> Viewing Profile
+
+                        </button>
+
+                    `;
+
+            }
+
+
+
+            // Attach listeners after rendering buttons
+
+            document.getElementById('edit-profile-btn')?.addEventListener('click', openEditProfileModal);
+
+            document.getElementById('profile-logout-btn')?.addEventListener('click', handleProfileModalLogout);
+
+
+
+            openModal('profile');
+
+        } else {
+
+            console.error('Error fetching profile:', data.message);
+
+            showMessage('Error loading profile: ' + data.message, 'error');
+
+        }
+
+    } catch (error) {
+
+        console.error('Fetch error for profile modal:', error);
+
+        showMessage('Error loading profile. Please try again.', 'error');
+
+    }
+
+}

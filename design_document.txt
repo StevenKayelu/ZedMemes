@@ -1,0 +1,40 @@
+ZedMemes Design Document
+
+Page 1 - CSS Framework & DB Design
+
+Framework Chosen: Foundation CSS
+- Reason: Mobile-first, flexible grid system, easy modals
+
+Database Design:
+
+Table       | Description
+------------|------------------------------
+users       | Stores user accounts
+memes       | Stores uploaded image data
+reactions   | Stores like/upvote per meme
+
+Relationships:
+- memes.user_id → users.id
+- reactions.user_id & meme_id → many-to-one
+
+Page 2 - Frontend/Backend Structure & Challenges
+
+Frontend:
+- HTML + Foundation CSS
+- jQuery for AJAX, modals, and interaction
+- AJAX used for login, signup, upload, and reactions
+
+Backend:
+- PHP handles sessions, DB ops, file uploads, and reactions
+- MySQL for persistent data storage
+- includes/auth.php for session and auth checks
+
+Challenges Faced:
+- AJAX file uploads via modal forms
+- Preventing duplicate reactions
+- Mobile responsiveness with dynamic content
+
+Solutions:
+- Used FormData with jQuery for uploads
+- Enforced UNIQUE constraint in reactions table
+- Used Foundation’s grid + media queries for responsiveness
